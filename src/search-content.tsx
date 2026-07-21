@@ -2,9 +2,13 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { basename } from "node:path";
 import { useState } from "react";
 import { DirectoryPickerForm } from "./components/DirectoryPickerForm";
+import { useContentSearch } from "./hooks/useContentSearch";
 import { useSearchDirectory } from "./hooks/useSearchDirectory";
+import { ENGINE_LABELS } from "./services/search-engine-resolver";
 import type { SearchDirectorySource } from "./types/finder";
+import type { SearchStatus } from "./types/search";
 import { getValidatedPreferences } from "./utils/preferences";
+import { searchOptionsFromPreferences } from "./utils/search-options";
 
 const SOURCE_LABELS: Record<SearchDirectorySource, string> = {
   "finder-selection": "Finder selection",
@@ -15,11 +19,19 @@ const SOURCE_LABELS: Record<SearchDirectorySource, string> = {
   home: "Home directory",
 };
 
+function emptyTitle(status: SearchStatus, query: string): string {
+  if (status === "error") return "Search Failed";
+  if (status === "searching") return "Searching…";
+  if (query.trim().length === 0) return "Type to Search File Contents";
+  return status === "cancelled" ? "Search Cancelled" : "No Results";
+}
+
 export default function Command() {
   const [preferences] = useState(getValidatedPreferences);
+  const [options] = useState(() => searchOptionsFromPreferences(preferences));
   const { directory, finderError, isLoading, redetect, setDirectory, useHomeDirectory } =
     useSearchDirectory(preferences);
-  const [searchText, setSearchText] = useState("");
+  const search = useContentSearch(directory?.path ?? null, options, preferences);
 
   const directoryActions = (
     <ActionPanel>
@@ -31,15 +43,16 @@ export default function Command() {
         />
         <Action title="Detect Finder Directory" icon={Icon.Finder} onAction={() => void redetect()} />
         <Action title="Use Home Directory" icon={Icon.House} onAction={() => void useHomeDirectory()} />
+        <Action title="Refresh Search" icon={Icon.ArrowClockwise} onAction={search.refresh} />
       </ActionPanel.Section>
     </ActionPanel>
   );
 
   const emptyView = directory ? (
     <List.EmptyView
-      icon={Icon.MagnifyingGlass}
-      title={searchText ? "Search Not Wired Up Yet" : "Type to Search File Contents"}
-      description={`${directory.path} · ${SOURCE_LABELS[directory.source]}`}
+      icon={search.status === "error" ? Icon.Warning : Icon.MagnifyingGlass}
+      title={emptyTitle(search.status, search.query)}
+      description={search.error?.message ?? `${directory.path} · ${SOURCE_LABELS[directory.source]}`}
       actions={directoryActions}
     />
   ) : (
@@ -51,17 +64,36 @@ export default function Command() {
     />
   );
 
+  const sectionTitle = [
+    search.engine ? ENGINE_LABELS[search.engine] : "Searching…",
+    search.limitReached ? `first ${search.results.length} results` : `${search.results.length} results`,
+  ].join(" · ");
+
   return (
     <List
       filtering={false}
-      isLoading={isLoading}
-      onSearchTextChange={setSearchText}
+      isLoading={isLoading || search.status === "searching"}
+      onSearchTextChange={search.setQuery}
       searchBarPlaceholder={
         directory ? `Search in ${basename(directory.path) || directory.path}…` : "Search text in files…"
       }
       throttle
     >
-      {emptyView}
+      {search.results.length === 0 ? (
+        emptyView
+      ) : (
+        <List.Section title={sectionTitle}>
+          {search.results.map((result, index) => (
+            <List.Item
+              key={`${result.filePath}:${result.line}:${result.column}:${index}`}
+              icon={Icon.Text}
+              title={result.lineText.trim() || result.fileName}
+              subtitle={`${result.relativePath}:${result.line}:${result.column}`}
+              actions={directoryActions}
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
