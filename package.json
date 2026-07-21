@@ -3,7 +3,7 @@
   "name": "folder-scope",
   "title": "Folder Scope",
   "description": "Search text instantly inside files in your active Finder folder.",
-  "icon": "extension-icon.png",
+  "icon": "folder-scope-icon.png",
   "author": "omer_aydemir",
   "platforms": [
     "macOS"
