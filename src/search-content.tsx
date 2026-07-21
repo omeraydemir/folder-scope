@@ -1,86 +1,24 @@
-import { URLSearchParams } from "node:url";
-import { ActionPanel, Action, List, Keyboard } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { List } from "@raycast/api";
 import { useState } from "react";
+import { getValidatedPreferences } from "./utils/preferences";
+
+const ENGINE_LABELS: Record<string, string> = {
+  automatic: "Automatic",
+  bundled: "Bundled ripgrep",
+  system: "System ripgrep",
+  node: "Node.js fallback",
+};
 
 export default function Command() {
+  const [preferences] = useState(getValidatedPreferences);
   const [searchText, setSearchText] = useState("");
-  const { data, isLoading } = useFetch(
-    "https://api.npms.io/v2/search?" +
-      // send the search query to the API
-      new URLSearchParams({ q: searchText.length === 0 ? "@raycast/api" : searchText }),
-    {
-      parseResponse: parseFetchResponse,
-    },
-  );
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search npm packages…" throttle>
-      <List.Section title="Results" subtitle={data?.length + ""}>
-        {data?.map((searchResult) => (
-          <SearchListItem key={searchResult.name} searchResult={searchResult} />
-        ))}
-      </List.Section>
+    <List filtering={false} onSearchTextChange={setSearchText} searchBarPlaceholder="Search text in files…" throttle>
+      <List.EmptyView
+        title={searchText ? "Search Not Wired Up Yet" : "Type to Search File Contents"}
+        description={`Engine preference: ${ENGINE_LABELS[preferences.preferredEngine]}`}
+      />
     </List>
   );
-}
-
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
-  return (
-    <List.Item
-      title={searchResult.name}
-      subtitle={searchResult.description}
-      accessories={[{ text: searchResult.username }]}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Install Command"
-              content={`npm install ${searchResult.name}`}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-/** Parse the response from the fetch query into something we can display */
-async function parseFetchResponse(response: Response) {
-  const json = (await response.json()) as
-    | {
-        results: {
-          package: {
-            name: string;
-            description?: string;
-            publisher?: { username: string };
-            links: { npm: string };
-          };
-        }[];
-      }
-    | { code: string; message: string };
-
-  if (!response.ok || "message" in json) {
-    throw new Error("message" in json ? json.message : response.statusText);
-  }
-
-  return json.results.map((result) => {
-    return {
-      name: result.package.name,
-      description: result.package.description,
-      username: result.package.publisher?.username,
-      url: result.package.links.npm,
-    } as SearchResult;
-  });
-}
-
-interface SearchResult {
-  name: string;
-  description?: string;
-  username?: string;
-  url: string;
 }
