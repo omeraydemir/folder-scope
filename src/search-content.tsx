@@ -1,13 +1,16 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { basename } from "node:path";
+import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { basename, dirname } from "node:path";
 import { useCallback, useState } from "react";
 import { DirectoryPickerForm } from "./components/DirectoryPickerForm";
 import { useContentSearch } from "./hooks/useContentSearch";
 import { useSearchDirectory } from "./hooks/useSearchDirectory";
+import { openInEditor } from "./services/editor-launcher";
 import { ENGINE_LABELS, type EngineFailure } from "./services/search-engine-resolver";
 import type { SearchDirectorySource } from "./types/finder";
 import type { CaseMode, SearchMode } from "./types/preferences";
-import type { SearchError, SearchErrorKind, SearchOptions } from "./types/search";
+import type { SearchError, SearchErrorKind, SearchOptions, SearchResult } from "./types/search";
+import { EDITOR_TITLES } from "./utils/editor-open";
 import { getValidatedPreferences } from "./utils/preferences";
 import { resultDetailMarkdown } from "./utils/result-detail";
 import { searchOptionsFromPreferences } from "./utils/search-options";
@@ -113,8 +116,36 @@ export default function Command() {
     });
   }, []);
 
-  const actions = (
-    <ActionPanel>
+  const excludeFromSearch = useCallback((glob: string, label: string) => {
+    setOptions((previous) =>
+      previous.excludeGlobs.includes(glob) ? previous : { ...previous, excludeGlobs: [...previous.excludeGlobs, glob] },
+    );
+    void showToast({ style: Toast.Style.Success, title: `Excluded ${label} for this session` });
+  }, []);
+
+  const clearExclusions = useCallback(() => {
+    setOptions((previous) => (previous.excludeGlobs.length === 0 ? previous : { ...previous, excludeGlobs: [] }));
+  }, []);
+
+  const openResultInEditor = useCallback(
+    async (result: SearchResult) => {
+      try {
+        await openInEditor(preferences.preferredEditor, {
+          filePath: result.filePath,
+          line: result.line,
+          column: result.column,
+        });
+      } catch (error) {
+        await showFailureToast(error, { title: "Could Not Open Editor" });
+      }
+    },
+    [preferences.preferredEditor],
+  );
+
+  const parentPath = directory === null ? null : dirname(directory.path);
+
+  const sharedSections = (
+    <>
       <ActionPanel.Section title="Search Options">
         <Action
           title={options.wholeWord ? "Disable Whole Word" : "Enable Whole Word"}
@@ -136,6 +167,13 @@ export default function Command() {
           icon={Icon.Document}
           onAction={() => setShowDetail((value) => !value)}
         />
+        {options.excludeGlobs.length > 0 ? (
+          <Action
+            title={`Clear Session Exclusions (${options.excludeGlobs.length})`}
+            icon={Icon.XMarkCircle}
+            onAction={clearExclusions}
+          />
+        ) : null}
       </ActionPanel.Section>
       <ActionPanel.Section title="Search Directory">
         <Action.Push
@@ -143,12 +181,72 @@ export default function Command() {
           icon={Icon.Folder}
           target={<DirectoryPickerForm onPick={(path) => void setDirectory(path, "user-picked")} />}
         />
+        {parentPath !== null && directory !== null && parentPath !== directory.path ? (
+          <Action
+            title="Search Parent Folder"
+            icon={Icon.ArrowUp}
+            shortcut={Keyboard.Shortcut.Common.MoveUp}
+            onAction={() => void setDirectory(parentPath, "user-picked")}
+          />
+        ) : null}
         <Action title="Detect Finder Directory" icon={Icon.Finder} onAction={() => void redetect()} />
         <Action title="Use Home Directory" icon={Icon.House} onAction={() => void useHomeDirectory()} />
-        <Action title="Refresh Search" icon={Icon.ArrowClockwise} onAction={search.refresh} />
+        <Action
+          title="Refresh Search"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={search.refresh}
+        />
       </ActionPanel.Section>
-    </ActionPanel>
+    </>
   );
+
+  const actions = <ActionPanel>{sharedSections}</ActionPanel>;
+
+  const resultActions = (result: SearchResult) => {
+    const relativeDir = dirname(result.relativePath);
+    const contextContent = [...(result.contextBefore ?? []), result.lineText, ...(result.contextAfter ?? [])].join(
+      "\n",
+    );
+    return (
+      <ActionPanel>
+        <ActionPanel.Section>
+          <Action.Open title="Open File" target={result.filePath} />
+          <Action
+            title={`Open in ${EDITOR_TITLES[preferences.preferredEditor]}`}
+            icon={Icon.Code}
+            onAction={() => void openResultInEditor(result)}
+          />
+          <Action.ShowInFinder path={result.filePath} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+        </ActionPanel.Section>
+        <ActionPanel.Section title="Copy">
+          <Action.CopyToClipboard
+            title="Copy Path"
+            content={result.filePath}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
+          <Action.CopyToClipboard title="Copy Relative Path" content={result.relativePath} />
+          <Action.CopyToClipboard title="Copy Line" content={result.lineText} />
+          <Action.CopyToClipboard title="Copy Line with Context" content={contextContent} />
+        </ActionPanel.Section>
+        <ActionPanel.Section title="Exclude from Search">
+          <Action
+            title={`Exclude File ${result.fileName}`}
+            icon={Icon.EyeDisabled}
+            onAction={() => excludeFromSearch(result.relativePath, result.relativePath)}
+          />
+          {relativeDir !== "." ? (
+            <Action
+              title={`Exclude Folder ${relativeDir}`}
+              icon={Icon.EyeDisabled}
+              onAction={() => excludeFromSearch(`${relativeDir}/**`, `${relativeDir}/`)}
+            />
+          ) : null}
+        </ActionPanel.Section>
+        {sharedSections}
+      </ActionPanel>
+    );
+  };
 
   const empty = emptyViewProps(directory, finderError, search);
   const engineLabel = search.engine ? ENGINE_LABELS[search.engine] : "Resolving engine…";
@@ -231,7 +329,7 @@ export default function Command() {
                     />
                   ) : undefined
                 }
-                actions={actions}
+                actions={resultActions(result)}
               />
             );
           })}
