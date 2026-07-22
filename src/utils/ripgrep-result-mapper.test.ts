@@ -7,6 +7,28 @@ test("decodes ripgrep byte values", () => {
   assert.equal(decodeRipgrepText({ bytes: Buffer.from("Türkçe yol").toString("base64") }), "Türkçe yol");
 });
 
+test("normalizes relative and absolute ripgrep paths against the search root", () => {
+  const emitted: SearchResult[] = [];
+  const mapper = new RipgrepResultMapper("/tmp/root", 0, 0, (batch) => emitted.push(...batch));
+  const match = (path: string) => {
+    mapper.consume({
+      type: "match",
+      data: { path: { text: path }, lines: { text: "x\n" }, line_number: 1, submatches: [{ start: 0, end: 1 }] },
+    });
+  };
+
+  match("alt/iç içe/dosya.ts"); // rg emits root-relative paths
+  match("/tmp/root/alt/iç içe/dosya.ts"); // absolute path, same file
+  match("/tmp/başka/dış.ts"); // outside the search root
+  mapper.finish();
+
+  assert.equal(emitted[0]?.filePath, "/tmp/root/alt/iç içe/dosya.ts");
+  assert.equal(emitted[0]?.relativePath, "alt/iç içe/dosya.ts");
+  assert.equal(emitted[0]?.fileName, "dosya.ts");
+  assert.equal(emitted[1]?.relativePath, "alt/iç içe/dosya.ts");
+  assert.equal(emitted[2]?.relativePath, "../başka/dış.ts");
+});
+
 test("keeps multiple same-line submatches distinct and attaches context", () => {
   const emitted: SearchResult[] = [];
   const mapper = new RipgrepResultMapper("/tmp/Arama Klasörü", 1, 1, (batch) => emitted.push(...batch));
