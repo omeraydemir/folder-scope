@@ -67,7 +67,7 @@ ripgrep is dual-licensed MIT / Unlicense; the prebuilt distribution is MIT-licen
 | Preference | Default | Description |
 | --- | --- | --- |
 | Default Search Directory | — | Used when no Finder directory can be detected. |
-| When No Finder Directory Is Available | Ask me to pick | Prompt for a folder, use the default directory, or use home. |
+| When No Finder Directory Is Available | Use home directory | Use home, prompt for a folder, or use the default directory. The UI shows when a fallback is in use. |
 | Search Engine | Automatic | Automatic, bundled ripgrep, system ripgrep, or Node.js fallback. |
 | Default Case Sensitivity | Smart case | Case-insensitive unless the query contains an uppercase letter. |
 | Default Search Mode | Plain text | Plain text or ripgrep-style regular expression. |

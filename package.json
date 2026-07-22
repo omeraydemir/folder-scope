@@ -34,7 +34,7 @@
       "description": "What to do when Finder has no usable selection or window.",
       "type": "dropdown",
       "required": false,
-      "default": "prompt",
+      "default": "home",
       "data": [
         { "title": "Ask Me to Pick a Directory", "value": "prompt" },
         { "title": "Use the Default Search Directory", "value": "default-directory" },

@@ -65,7 +65,7 @@ export function validatePreferences(raw: RawPreferences): ExtensionPreferences {
 
   return {
     defaultDirectory: raw.defaultDirectory?.trim() || null,
-    noFinderBehavior: oneOf<NoFinderBehavior>(raw.noFinderBehavior, ["prompt", "default-directory", "home"], "prompt"),
+    noFinderBehavior: oneOf<NoFinderBehavior>(raw.noFinderBehavior, ["prompt", "default-directory", "home"], "home"),
     preferredEngine: oneOf<EngineChoice>(raw.preferredEngine, ["automatic", "bundled", "system", "node"], "automatic"),
     defaultCaseMode: oneOf<CaseMode>(raw.defaultCaseMode, ["smart", "sensitive", "insensitive"], "smart"),
     defaultSearchMode: oneOf<SearchMode>(raw.defaultSearchMode, ["text", "regex"], "text"),

@@ -5,7 +5,7 @@ import { DEFAULT_EXCLUDED_DIRECTORIES, parseList, validatePreferences } from "./
 test("empty raw preferences produce safe defaults", () => {
   const prefs = validatePreferences({});
   assert.equal(prefs.defaultDirectory, null);
-  assert.equal(prefs.noFinderBehavior, "prompt");
+  assert.equal(prefs.noFinderBehavior, "home");
   assert.equal(prefs.preferredEngine, "automatic");
   assert.equal(prefs.defaultCaseMode, "smart");
   assert.equal(prefs.defaultSearchMode, "text");
@@ -28,7 +28,7 @@ test("garbage enum values fall back instead of crashing", () => {
     defaultSearchMode: "telepathy",
     preferredEditor: "vim",
   });
-  assert.equal(prefs.noFinderBehavior, "prompt");
+  assert.equal(prefs.noFinderBehavior, "home");
   assert.equal(prefs.preferredEngine, "automatic");
   assert.equal(prefs.defaultCaseMode, "smart");
   assert.equal(prefs.defaultSearchMode, "text");
