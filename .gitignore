@@ -13,6 +13,8 @@ compiled_raycast_rust
 # misc
 .DS_Store
 
+# CLAUDE
 CLAUDE.md
+
 # local docs
-/docs/
+.local/
