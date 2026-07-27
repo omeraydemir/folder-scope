@@ -17,7 +17,7 @@ Folder Scope detects the folder you are working in (your Finder selection or fro
 
 ### From the Raycast Store
 
-Install **Folder Scope** from the Raycast Store once published.
+Install **Folder Scope** from the Raycast Store.
 
 ### From source
 
@@ -38,7 +38,7 @@ npm run dev
 2. Open Raycast and run **Search Content**.
 3. Type your query. Results stream in live.
 
-The navigation title shows the active folder and how it was detected. The dropdown in the search bar switches between plain-text and regex modes and case behavior. The action panel (`⌘K`) exposes all result actions, search-option toggles, and directory actions (change directory, search parent folder, re-detect Finder, use home directory).
+The results header above the match list shows the active folder and how it was detected. The dropdown in the search bar switches between plain-text and regex modes and case behavior. The action panel (`⌘K`) exposes all result actions, search-option toggles, and directory actions (change directory, search parent folder, re-detect Finder, use home directory).
 
 ### How the search directory is chosen
 

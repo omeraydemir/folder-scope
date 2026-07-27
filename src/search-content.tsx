@@ -343,13 +343,15 @@ export default function Command() {
   const countLabel = search.limitReached
     ? `first ${search.results.length} matches · limit reached`
     : `${search.results.length} matches`;
+  // Keep it short: the folder name is already in the search bar placeholder and
+  // the detail metadata, and a long subtitle wraps when the detail pane is open.
   const fallbackLabel =
     search.failures.length > 0
-      ? `fallback from ${search.failures.map((failure) => ENGINE_LABELS[failure.engine]).join(", ")}`
+      ? search.failures.length === 1
+        ? `fallback from ${ENGINE_LABELS[search.failures[0].engine]}`
+        : `fallback from ${search.failures.length} engines`
       : null;
-  const sectionSubtitle = directory
-    ? (fallbackLabel ?? `${basename(directory.path) || directory.path} · ${SOURCE_LABELS[directory.source]}`)
-    : undefined;
+  const sectionSubtitle = directory ? (fallbackLabel ?? SOURCE_LABELS[directory.source]) : undefined;
 
   return (
     <List
