@@ -134,7 +134,7 @@ function emptyViewProps(
 export default function Command() {
   const [preferences] = useState(getValidatedPreferences);
   const [options, setOptions] = useState(() => searchOptionsFromPreferences(preferences));
-  const [showDetail, setShowDetail] = useState(true);
+  const [showDetail, setShowDetail] = useState(preferences.showMatchPreview);
   const { directory, finderError, isLoading, redetect, setDirectory, useHomeDirectory } =
     useSearchDirectory(preferences);
   const search = useContentSearch(directory?.path ?? null, options, preferences);

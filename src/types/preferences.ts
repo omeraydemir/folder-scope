@@ -17,6 +17,8 @@ export interface ExtensionPreferences {
   maxFileSizeBytes: number;
   /** Context lines before and after the match in the detail preview. */
   previewContextLines: number;
+  /** Whether the detail preview starts open. */
+  showMatchPreview: boolean;
   searchHiddenFiles: boolean;
   respectIgnoreFiles: boolean;
   excludedDirectories: string[];

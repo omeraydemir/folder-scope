@@ -14,6 +14,8 @@ test("empty raw preferences produce safe defaults", () => {
   assert.equal(prefs.maxFileSizeBytes, 10 * 1024 * 1024);
   assert.equal(prefs.searchHiddenFiles, false);
   assert.equal(prefs.respectIgnoreFiles, true);
+  assert.equal(prefs.showMatchPreview, true);
+  assert.equal(validatePreferences({ showMatchPreview: false }).showMatchPreview, false);
   assert.deepEqual(prefs.excludedDirectories, DEFAULT_EXCLUDED_DIRECTORIES);
   assert.deepEqual(prefs.includedExtensions, []);
   assert.equal(prefs.debounceMs, 200);

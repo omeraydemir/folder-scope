@@ -74,7 +74,8 @@ ripgrep is dual-licensed MIT / Unlicense; the prebuilt distribution is MIT-licen
 | Default Search Depth | Unlimited | Maximum directory depth; `1` searches only the current folder. |
 | Maximum Results | 250 | Stop after this many results. |
 | Maximum File Size (MB) | 10 | Larger files are skipped. |
-| Preview Context Lines | 1 | Lines shown before and after the match in the preview (0–10). |
+| Preview Context Lines | 0 | Context lines above and below the match in the preview (0–10). |
+| Match Preview | On | Whether the detail preview starts open; toggle anytime from the action panel. |
 | Hidden Files | Off | Include dotfiles and hidden directories. |
 | Ignore Files | On | Respect `.gitignore`, `.ignore`, and similar files. |
 | Excluded Directories | `.git, node_modules, …` | Directory names that are never searched. |

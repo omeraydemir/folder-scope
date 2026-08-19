@@ -121,6 +121,15 @@
       "default": "0"
     },
     {
+      "name": "showMatchPreview",
+      "title": "Match Preview",
+      "label": "Show the match preview by default",
+      "description": "Start with the detail preview open. Toggle it anytime with “Show/Hide Match Preview” in the action panel.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
       "name": "searchHiddenFiles",
       "title": "Hidden Files",
       "label": "Search hidden files and directories",
