@@ -53,7 +53,7 @@ export function searchOptionsFromPreferences(preferences: ExtensionPreferences):
     excludeGlobs: [],
     maxResults: preferences.maxResults,
     maxFileSizeBytes: preferences.maxFileSizeBytes,
-    contextBefore: 0,
-    contextAfter: 0,
+    contextBefore: preferences.previewContextLines,
+    contextAfter: preferences.previewContextLines,
   });
 }

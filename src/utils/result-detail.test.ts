@@ -7,9 +7,9 @@ const NBSP = "\u00A0";
 
 function result(overrides: Partial<SearchResult>): SearchResult {
   return {
-    filePath: "/tmp/project/src/app.ts",
-    relativePath: "src/app.ts",
-    fileName: "app.ts",
+    filePath: "/tmp/project/notes.txt",
+    relativePath: "notes.txt",
+    fileName: "notes.txt",
     line: 3,
     column: 1,
     lineText: "hello world",
@@ -84,6 +84,28 @@ test("parentheses stay literal — Raycast renders \\(..\\) as LaTeX math", () =
     caseMode: "smart",
   });
   assert.equal(markdown, "clear**Timeout**(filterTimeout);");
+});
+
+test("code files render as a fenced block with a language tag and no escaping", () => {
+  const markdown = resultDetailMarkdown(
+    result({
+      fileName: "app.ts",
+      lineText: "const value = a * b;",
+      contextBefore: ["// before"],
+      contextAfter: ["// after"],
+    }),
+    "value",
+    { searchMode: "text", caseMode: "sensitive" },
+  );
+  assert.equal(markdown, "```typescript\n// before\nconst value = a * b;\n// after\n```");
+});
+
+test("unknown extensions still get a plain fence, and the fence outgrows backtick runs", () => {
+  const markdown = resultDetailMarkdown(result({ fileName: "data.xyz", lineText: "docs use ``` fences" }), "docs", {
+    searchMode: "text",
+    caseMode: "sensitive",
+  });
+  assert.equal(markdown, "````\ndocs use ``` fences\n````");
 });
 
 test("no LaTeX delimiter can survive escaping", () => {

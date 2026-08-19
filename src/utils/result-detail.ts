@@ -76,22 +76,90 @@ function protectIndent(line: string): string {
 function renderLine(rawLine: string, span: [number, number] | null): string {
   const line = protectIndent(rawLine);
   if (span === null || span[0] >= span[1] || span[1] > line.length) return escapeMarkdown(line);
+
   const before = escapeMarkdown(line.slice(0, span[0]));
   const match = escapeMarkdown(line.slice(span[0], span[1]));
   const after = escapeMarkdown(line.slice(span[1]));
   return `${before}**${match}**${after}`;
 }
 
+/** Files rendered as styled text with the match bolded; everything else gets a code fence. */
+const PROSE_EXTENSIONS = new Set(["md", "markdown", "mdx", "txt", "text"]);
+
+const FENCE_LANGUAGES: Record<string, string> = {
+  ts: "typescript",
+  tsx: "tsx",
+  js: "javascript",
+  jsx: "jsx",
+  mjs: "javascript",
+  cjs: "javascript",
+  py: "python",
+  rb: "ruby",
+  go: "go",
+  rs: "rust",
+  java: "java",
+  kt: "kotlin",
+  kts: "kotlin",
+  swift: "swift",
+  c: "c",
+  h: "c",
+  cpp: "cpp",
+  cc: "cpp",
+  cxx: "cpp",
+  hpp: "cpp",
+  cs: "csharp",
+  php: "php",
+  sh: "bash",
+  bash: "bash",
+  zsh: "bash",
+  sql: "sql",
+  css: "css",
+  scss: "scss",
+  html: "html",
+  htm: "html",
+  xml: "xml",
+  json: "json",
+  yml: "yaml",
+  yaml: "yaml",
+  toml: "toml",
+  dart: "dart",
+  lua: "lua",
+};
+
+function fileExtension(fileName: string): string {
+  const dot = fileName.lastIndexOf(".");
+  return dot === -1 ? "" : fileName.slice(dot + 1).toLowerCase();
+}
+
+/** The fence must be longer than any backtick run in the content. */
+function codeBlock(lines: string[], language: string): string {
+  const longestRun = Math.max(
+    2,
+    ...lines.map((line) => (line.match(/`+/g) ?? []).reduce((max, run) => Math.max(max, run.length), 0)),
+  );
+  const fence = "`".repeat(longestRun + 1);
+  return `${fence}${language}\n${lines.join("\n")}\n${fence}`;
+}
+
 /**
- * Detail-pane markdown: context-before lines, the match line with the matched
- * range bolded, context-after lines — joined with hard line breaks.
+ * Detail-pane markdown. Code and data files render as a fenced code block:
+ * monospace keeps the indentation and nothing inside a fence needs escaping.
+ * Bold highlighting is impossible inside a fence, so prose files (Markdown,
+ * plain text) keep the styled path with the matched range bolded.
  */
 export function resultDetailMarkdown(result: SearchResult, query: string, options: HighlightOptions): string {
+  const contextBefore = result.contextBefore ?? [];
+  const contextAfter = result.contextAfter ?? [];
+  if (!PROSE_EXTENSIONS.has(fileExtension(result.fileName))) {
+    const language = FENCE_LANGUAGES[fileExtension(result.fileName)] ?? "";
+    return codeBlock([...contextBefore, result.lineText, ...contextAfter], language);
+  }
+
   const span = locateMatch(result.lineText, result.column, query.trim(), options);
   const lines = [
-    ...(result.contextBefore ?? []).map((line) => renderLine(line, null)),
+    ...contextBefore.map((line) => renderLine(line, null)),
     renderLine(result.lineText, span),
-    ...(result.contextAfter ?? []).map((line) => renderLine(line, null)),
+    ...contextAfter.map((line) => renderLine(line, null)),
   ];
   return lines.map((line) => (line.length === 0 ? "\u00A0" : line)).join("  \n");
 }

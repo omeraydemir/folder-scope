@@ -17,6 +17,7 @@ export interface RawPreferences {
   defaultMaxDepth?: string;
   maxResults?: string;
   maxFileSizeMb?: string;
+  previewContextLines?: string;
   searchHiddenFiles?: boolean;
   respectIgnoreFiles?: boolean;
   excludedDirectories?: string;
@@ -72,6 +73,7 @@ export function validatePreferences(raw: RawPreferences): ExtensionPreferences {
     defaultMaxDepth: Number.isNaN(depth) || depth < 1 ? null : Math.min(depth, 100),
     maxResults: boundedInt(raw.maxResults, 1, 10_000, 250),
     maxFileSizeBytes: boundedInt(raw.maxFileSizeMb, 1, 1_000, 10) * 1024 * 1024,
+    previewContextLines: boundedInt(raw.previewContextLines, 0, 10, 0),
     searchHiddenFiles: raw.searchHiddenFiles === true,
     respectIgnoreFiles: raw.respectIgnoreFiles !== false,
     excludedDirectories: excluded.length > 0 ? excluded : DEFAULT_EXCLUDED_DIRECTORIES,

@@ -113,6 +113,14 @@
       "default": "10"
     },
     {
+      "name": "previewContextLines",
+      "title": "Preview Context Lines",
+      "description": "Context lines above and below the matched line (0–10). For example, 1 shows three lines in total. Also used by “Copy Line with Context”.",
+      "type": "textfield",
+      "required": false,
+      "default": "0"
+    },
+    {
       "name": "searchHiddenFiles",
       "title": "Hidden Files",
       "label": "Search hidden files and directories",

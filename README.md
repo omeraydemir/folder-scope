@@ -74,6 +74,7 @@ ripgrep is dual-licensed MIT / Unlicense; the prebuilt distribution is MIT-licen
 | Default Search Depth | Unlimited | Maximum directory depth; `1` searches only the current folder. |
 | Maximum Results | 250 | Stop after this many results. |
 | Maximum File Size (MB) | 10 | Larger files are skipped. |
+| Preview Context Lines | 1 | Lines shown before and after the match in the preview (0–10). |
 | Hidden Files | Off | Include dotfiles and hidden directories. |
 | Ignore Files | On | Respect `.gitignore`, `.ignore`, and similar files. |
 | Excluded Directories | `.git, node_modules, …` | Directory names that are never searched. |
@@ -116,7 +117,7 @@ All non-trivial pure logic is covered by `node --test` unit tests (108 tests).
   - Ignore-file support is a subset: `.gitignore`/`.ignore` only, no `!` negation patterns, and ignore files in parent directories of the search root are not read.
   - Files are decoded as UTF-8 only.
   - Multiline matches are reported on their first line.
-- **Match highlighting** is only available in the detail view (toggle “Show Match Preview”); Raycast list rows accept plain text only.
+- **Match highlighting** is only available in the detail view (toggle “Show Match Preview”), and only for Markdown and plain-text files; code and data files render as a monospaced code block, where Raycast's markdown cannot bold the matched range. Raycast list rows accept plain text only.
 - **No free-form ripgrep arguments**: every supported flag is exposed as a validated option instead, so user input can never reach the process boundary unchecked.
 - **No encoding selection**: ripgrep's automatic UTF-8/UTF-16 BOM detection covers the practical cases.
 - The bundled engine needs a one-time network download; offline first use falls back to system ripgrep or the Node engine.

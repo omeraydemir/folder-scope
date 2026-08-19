@@ -75,4 +75,14 @@ test("options derived from default preferences are already normalized", () => {
   assert.equal(options.multiline, false);
   assert.equal(options.includeBinary, false);
   assert.equal(options.searchFileNames, false);
+  assert.equal(options.contextBefore, 0);
+  assert.equal(options.contextAfter, 0);
+});
+
+test("preview context lines preference is bounded and feeds both context options", () => {
+  const options = searchOptionsFromPreferences(validatePreferences({ previewContextLines: "99" }));
+  assert.equal(options.contextBefore, 10);
+  const off = searchOptionsFromPreferences(validatePreferences({ previewContextLines: "0" }));
+  assert.equal(off.contextBefore, 0);
+  assert.equal(off.contextAfter, 0);
 });
