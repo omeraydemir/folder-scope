@@ -15,22 +15,9 @@ Folder Scope detects the folder you are working in (your Finder selection or fro
 
 ## Installation
 
-### From the Raycast Store
-
 Install **Folder Scope** from the Raycast Store.
 
-### From source
-
-Requirements: Raycast on macOS, Node.js ≥ 22.14.
-
-```bash
-git clone https://github.com/omeraydemir/folder-scope.git
-cd folder-scope
-npm install
-npm run dev
-```
-
-`npm run dev` builds the extension and loads it into Raycast in development mode.
+For development setup, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Usage
 
@@ -67,7 +54,7 @@ ripgrep is dual-licensed MIT / Unlicense; the prebuilt distribution is MIT-licen
 | Preference | Default | Description |
 | --- | --- | --- |
 | Default Search Directory | — | Used when no Finder directory can be detected. |
-| When No Finder Directory Is Available | Use home directory | Use home, prompt for a folder, or use the default directory. The UI shows when a fallback is in use. |
+| When No Finder Directory Is Available | Use My Home Directory | Use home, prompt for a folder, or use the default directory. The UI shows when a fallback is in use. |
 | Search Engine | Automatic | Automatic, bundled ripgrep, system ripgrep, or Node.js fallback. |
 | Default Case Sensitivity | Smart case | Case-insensitive unless the query contains an uppercase letter. |
 | Default Search Mode | Plain text | Plain text or ripgrep-style regular expression. |
@@ -107,7 +94,7 @@ src/
   types/                Domain types
 ```
 
-All non-trivial pure logic is covered by `node --test` unit tests (108 tests).
+All non-trivial pure logic is covered by `node --test` unit tests.
 
 ## Known limitations
 
