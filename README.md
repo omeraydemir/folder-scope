@@ -8,7 +8,7 @@ Folder Scope detects the folder you are working in (your Finder selection or fro
 
 - **Finder-aware**: searches the folder selected in Finder, the parent folder of a selected file, or the frontmost Finder window's folder — no manual path entry needed.
 - **Fast, streaming results**: matches appear as you type, with debouncing and cancellation of stale searches.
-- **Plain text or regex**, with smart-case, case-sensitive, or case-insensitive matching.
+- **Plain text or regex**, with smart-case, case-sensitive, or case-insensitive matching, plus a whole-word toggle.
 - **Rich results**: file name, relative path, line and column, and an optional detail view with highlighted match context.
 - **Powerful actions**: open the file, jump to the exact line in your editor (VS Code, Cursor, Zed, Sublime Text, JetBrains Rider), reveal in Finder, copy path/line/context, exclude files or folders from the current session, search the parent folder, and more.
 - **Respects `.gitignore`** and skips hidden files by default — both toggleable per search.
