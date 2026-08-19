@@ -75,5 +75,25 @@ test("markdown degrades to the escaped line when the match cannot be located", (
     searchMode: "text",
     caseMode: "sensitive",
   });
-  assert.equal(markdown, "plain \\[line\\]");
+  assert.equal(markdown, "plain [line\\]");
+});
+
+test("parentheses stay literal — Raycast renders \\(..\\) as LaTeX math", () => {
+  const markdown = resultDetailMarkdown(result({ lineText: "clearTimeout(filterTimeout);", column: 6 }), "Timeout", {
+    searchMode: "text",
+    caseMode: "smart",
+  });
+  assert.equal(markdown, "clear**Timeout**(filterTimeout);");
+});
+
+test("no LaTeX delimiter can survive escaping", () => {
+  const markdown = resultDetailMarkdown(result({ lineText: 'echo "$$PID" and regex \\(x\\) done' }), "missing", {
+    searchMode: "text",
+    caseMode: "sensitive",
+  });
+  // None of Raycast's math delimiters may appear in the output.
+  assert.ok(!markdown.includes("$$"));
+  assert.ok(!markdown.includes("\\("));
+  assert.ok(!markdown.includes("\\)"));
+  assert.ok(!markdown.includes("\\["));
 });

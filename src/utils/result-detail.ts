@@ -52,10 +52,20 @@ export function locateMatch(
   return index === -1 ? null : [index, index + needle.length];
 }
 
-const MARKDOWN_SPECIALS = /[\\`*_{}[\]()#+\-.!<>|~]/g;
+// Raycast's Detail markdown also renders LaTeX — \(..\) inline, \[..\] and
+// $$..$$ display — so ( ) [ must NOT be backslash-escaped: the escape itself
+// would create a math delimiter and swallow the brackets. Links still cannot
+// form because ] is escaped, and $ is escaped so $$ never survives.
+const MARKDOWN_SPECIALS = /[`*_{}\]$#+\-.!<>|~]/g;
 
 function escapeMarkdown(text: string): string {
-  return text.replace(MARKDOWN_SPECIALS, "\\$&");
+  return (
+    text
+      // The zero-width space keeps a literal \( in the source line from
+      // reassembling into the \( math delimiter after the backslash is escaped.
+      .replace(/\\/g, "\\\\\u200B")
+      .replace(MARKDOWN_SPECIALS, "\\$&")
+  );
 }
 
 /** Length-preserving, so match spans computed on the raw line stay valid. */
